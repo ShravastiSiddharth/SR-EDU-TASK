@@ -12,12 +12,12 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
     if (!email || !password) {
       toast.error("Please fill all fields.");
       return;
     }
-  
+
     try {
       const response = await axios.post(
         "http://localhost:8000/api/login",
@@ -31,33 +31,33 @@ const Login = () => {
           },
         }
       );
-  
-      // Check if response status is 200
-      if (response.status === 200) {
+
+      console.log(response, "response")
+     
+      
+      if (response.data.token) {
         const tokenData = response?.data;
-  
-        // Ensure tokenData and user details are valid
+        localStorage.setItem("authToken", response.data.token.original.token);
+        console.log(localStorage)
        
-          //const userName = tokenData.user.name;
-          //setUsername(userName); // Set username from the response
-          Swal.fire("Welcome!", "You have logged in successfully.", "success");
-          
-          // Redirect to dashboard with username
-          navigate("/dashboard");
-         
+        Swal.fire("Welcome!", "You have logged in successfully.", "success");
+
+        
+        navigate("/dashboard");
+
       } else {
         throw new Error("Login failed. Please try again.");
       }
     } catch (error) {
-      // If error.response exists, show specific error message from backend
+  
       const errorMessage = error.response?.data?.message || error.message || "An unknown error occurred.";
       Swal.fire("Error!", errorMessage, "error");
     }
   };
-  
 
-    return (
-      <div className="form-container" style={{ width: '300px', margin: '0 auto', padding: '20px', border: '1px solid #ccc', borderRadius: '8px', backgroundColor: '#f9f9f9' }}>
+
+  return (
+    <div className="form-container" style={{ width: '300px', margin: '0 auto', padding: '20px', border: '1px solid #ccc', borderRadius: '8px', backgroundColor: '#f9f9f9' }}>
       <h2 style={{ textAlign: 'center', fontFamily: 'Arial, sans-serif', color: '#333' }}>Login</h2>
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
         <input
@@ -104,7 +104,7 @@ const Login = () => {
         </button>
       </form>
     </div>
-    );
-  };
+  );
+};
 
-  export default Login;
+export default Login;

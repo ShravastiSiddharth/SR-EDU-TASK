@@ -1,6 +1,7 @@
 
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import TaskComponent from "./TaskComponent";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -58,6 +59,7 @@ const Dashboard = () => {
       <p style={{ fontSize: '16px', color: '#555' }}>
         Here you can manage your account, settings, and more.
       </p>
+      <TaskComponent/>
     </div>
   </div>
   );
