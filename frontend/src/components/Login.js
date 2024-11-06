@@ -8,7 +8,6 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
-  const [username, setUsername] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -21,40 +20,26 @@ const Login = () => {
     try {
       const response = await axios.post(
         "http://localhost:8000/api/login",
-        {
-          email,
-          password,
-        },
-        {
-          headers: {
-            Accept: "application/json",
-          },
-        }
+        { email, password },
+        { headers: { Accept: "application/json" } }
       );
 
-      console.log(response, "response")
-     
       
-      if (response.data.token) {
-        const tokenData = response?.data;
-        localStorage.setItem("authToken", response.data.token.original.token);
-        console.log(localStorage)
-       
+      console.log(response)
+      if (response.data.token.original.token) {
+        localStorage.setItem("authToken", response.data.token.original.token);  // Save the token
+        localStorage.setItem("userRole", response.data.token.original.user.role);  // Save the user's role
+console.log("user",localStorage)
         Swal.fire("Welcome!", "You have logged in successfully.", "success");
-
-        
         navigate("/dashboard");
-
       } else {
         throw new Error("Login failed. Please try again.");
       }
     } catch (error) {
-  
       const errorMessage = error.response?.data?.message || error.message || "An unknown error occurred.";
       Swal.fire("Error!", errorMessage, "error");
     }
   };
-
 
   return (
     <div className="form-container" style={{ width: '300px', margin: '0 auto', padding: '20px', border: '1px solid #ccc', borderRadius: '8px', backgroundColor: '#f9f9f9' }}>

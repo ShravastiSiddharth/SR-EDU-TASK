@@ -20,7 +20,7 @@ use App\Http\Controllers\Api\TaskController;
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
-
+Route::middleware('auth:sanctum')->post('/create-user', [AuthController::class, 'createUser']);
 
 Route::middleware('auth:sanctum')->group(function () {
  
@@ -29,3 +29,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/tasks/{id}', [TaskController::class, 'update']);
     Route::delete('/tasks/{id}', [TaskController::class, 'delete']);
 });
+
+Route::middleware('auth:sanctum')->get('/users-created-by-me', [AuthController::class, 'getUsersCreatedByLoggedInUser']);
+
+Route::middleware('auth:sanctum')->get('/tasks/assigned', [TaskController::class, 'getAssignedTasks']);

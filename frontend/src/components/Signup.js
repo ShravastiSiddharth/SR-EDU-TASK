@@ -14,7 +14,6 @@ const Signup = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-
     if (!name || !email || !password || !confirmPassword) {
       toast.error("Please fill all fields.");
       return;
@@ -28,26 +27,15 @@ const Signup = () => {
     try {
       const response = await axios.post(
         "http://localhost:8000/api/register",
-        {
-          name,
-          email,
-          password,
-        },
-        {
-          headers: {
-            Accept: "application/json",
-          },
-        }
+        { name, email, password },
+        { headers: { Accept: "application/json" } }
       );
+
       console.log(response)
-      console.log(
-        "heel"
-      )
       if (response.data.token) {
-        localStorage.setItem("authToken", response.data.token);
-        console.log(localStorage)
-
-
+        localStorage.setItem("authToken", response.data.token.token);  
+        localStorage.setItem("userRole", response.data.token.user.role );  
+console.log(localStorage)
         Swal.fire("Success!", "You have signed up successfully.", "success");
         navigate("/dashboard");
       }

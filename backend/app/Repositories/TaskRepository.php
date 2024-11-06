@@ -38,4 +38,11 @@ class TaskRepository
     {
         return Task::where('user_id', $userId)->get();
     }
+
+    public function findAllAssignedToUser(int $userId)
+{
+    // Fetch tasks where the assigned_to field matches the user ID
+    return Task::where('assigned_to', $userId)->get();
+}
+
 }

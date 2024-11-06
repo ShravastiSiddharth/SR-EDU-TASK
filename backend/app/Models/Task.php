@@ -11,7 +11,7 @@ class Task extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'task_name', 'description', 'status', 'user_id'
+        'task_name', 'description', 'status', 'user_id','created_by','assigned_to'
     ];
 
     protected $casts = [

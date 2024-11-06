@@ -7,110 +7,35 @@ const TaskComponent = () => {
     const [taskName, setTaskName] = useState('');
     const [description, setDescription] = useState('');
     const [status, setStatus] = useState('pending');
+    const [assignedTo, setAssignedTo] = useState('');  // new state for assigned user
+    const [users, setUsers] = useState([]);  // state to store users for the dropdown
     const [editingTask, setEditingTask] = useState(null);
     const [error, setError] = useState(null);
-    const [isFormVisible, setIsFormVisible] = useState(false); 
+    const [isFormVisible, setIsFormVisible] = useState(false);
 
     const apiUrl = 'http://localhost:8000/api/tasks';
+    const usersApiUrl = 'http://localhost:8000/api/users-created-by-me';
 
-    // useEffect(() => {
-    //     const fetchTasks = async () => {
-    //         try {
-    //             const token = localStorage.getItem('authToken');
-    //             const response = await axios.get(apiUrl, {
-    //                 headers: {
-    //                     Authorization: `Bearer ${token}`,
-    //                 },
-    //             });
-    //             setTasks(response.data.tasks);
-    //         } catch (error) {
-    //             setError('Failed to fetch tasks. Please try again later.');
-    //         }
-    //     };
+    // Fetch the list of users created by the logged-in admin
+    useEffect(() => {
+        const fetchUsers = async () => {
+            try {
+                const token = localStorage.getItem('authToken');
+                const response = await axios.get(usersApiUrl, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+                setUsers(response.data.users);
+            } catch (error) {
+                setError('Failed to fetch users. Please try again later.');
+            }
+        };
 
-    //     fetchTasks();
-    // }, []);
+        fetchUsers();
+    }, []);
 
-    const handleCreateTask = async (e) => {
-        e.preventDefault();
-        const token = localStorage.getItem('authToken');
-        try {
-            const response = await axios.post(
-                apiUrl,
-                { task_name: taskName, description, status },
-                { headers: { Authorization: `Bearer ${token}` } }
-            );
-            setTasks([...tasks, response.data.task]);
-            setTaskName('');
-            setDescription('');
-            setStatus('pending');
-            setIsFormVisible(false); 
-            Swal.fire('Success', 'Task created successfully!', 'success');
-        } catch (error) {
-            setError(error.response?.data?.message || 'Failed to create task');
-            Swal.fire('Error', 'Failed to create task', 'error');
-        }
-    };
-
-    const handleUpdateTask = async (e) => {
-        e.preventDefault();
-        if (!editingTask) return;
-
-        const token = localStorage.getItem('authToken');
-        try {
-            const response = await axios.put(
-                `${apiUrl}/${editingTask.id}`,
-                { task_name: taskName, description, status },
-                { headers: { Authorization: `Bearer ${token}` } }
-            );
-            const updatedTasks = tasks.map((task) =>
-                task.id === editingTask.id ? response.data.task : task
-            );
-            setTasks(updatedTasks);
-            setTaskName('');
-            setDescription('');
-            setStatus('pending');
-            setEditingTask(null);
-            setIsFormVisible(false); 
-
-            Swal.fire('Success', 'Task updated successfully!', 'success');
-           
-            
-        } catch (error) {
-            setError(error.response?.data?.message || 'Failed to update task');
-            Swal.fire('Error', 'Failed to update task', 'error');
-        }
-    };
-
-    const handleDeleteTask = async (taskId) => {
-        const token = localStorage.getItem('authToken');
-        try {
-            await axios.delete(`${apiUrl}/${taskId}`, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-            setTasks(tasks.filter((task) => task.id !== taskId));
-            Swal.fire('Deleted', 'Task deleted successfully!', 'success');
-        } catch (error) {
-            setError(error.response?.data?.message || 'Failed to delete task');
-            Swal.fire('Error', 'Failed to delete task', 'error');
-        }
-    };
-
-    const handleEditTask = (task) => {
-        setTaskName(task.task_name);
-        setDescription(task.description);
-        setStatus(task.status);
-        setEditingTask(task);
-        setIsFormVisible(true); 
-    };
-
-    const handleCreateNewTask = () => {
-        setTaskName('');
-        setDescription('');
-        setStatus('pending');
-        setEditingTask(null);
-        setIsFormVisible(true); 
-    };
+    // Fetch tasks when the component is mounted
     useEffect(() => {
         const fetchTasks = async () => {
             try {
@@ -128,6 +53,94 @@ const TaskComponent = () => {
 
         fetchTasks();
     }, []);
+
+    // Handle task creation
+    const handleCreateTask = async (e) => {
+        e.preventDefault();
+        const token = localStorage.getItem('authToken');
+        try {
+            const response = await axios.post(
+                apiUrl,
+                { task_name: taskName, description, status, assigned_to: assignedTo },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            setTasks([...tasks, response.data.task]);
+            setTaskName('');
+            setDescription('');
+            setStatus('pending');
+            setAssignedTo('');
+            setIsFormVisible(false);
+            Swal.fire('Success', 'Task created successfully!', 'success');
+        } catch (error) {
+            setError(error.response?.data?.message || 'Failed to create task');
+            Swal.fire('Error', 'Failed to create task', 'error');
+        }
+    };
+
+    // Handle task update
+    const handleUpdateTask = async (e) => {
+        e.preventDefault();
+        if (!editingTask) return;
+
+        const token = localStorage.getItem('authToken');
+        try {
+            const response = await axios.put(
+                `${apiUrl}/${editingTask.id}`,
+                { task_name: taskName, description, status, assigned_to: assignedTo },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            const updatedTasks = tasks.map((task) =>
+                task.id === editingTask.id ? response.data.task : task
+            );
+            setTasks(updatedTasks);
+            setTaskName('');
+            setDescription('');
+            setStatus('pending');
+            setAssignedTo('');
+            setEditingTask(null);
+            setIsFormVisible(false);
+            Swal.fire('Success', 'Task updated successfully!', 'success');
+        } catch (error) {
+            setError(error.response?.data?.message || 'Failed to update task');
+            Swal.fire('Error', 'Failed to update task', 'error');
+        }
+    };
+
+    // Handle task deletion
+    const handleDeleteTask = async (taskId) => {
+        const token = localStorage.getItem('authToken');
+        try {
+            await axios.delete(`${apiUrl}/${taskId}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            setTasks(tasks.filter((task) => task.id !== taskId));
+            Swal.fire('Deleted', 'Task deleted successfully!', 'success');
+        } catch (error) {
+            setError(error.response?.data?.message || 'Failed to delete task');
+            Swal.fire('Error', 'Failed to delete task', 'error');
+        }
+    };
+
+    // Handle task edit
+    const handleEditTask = (task) => {
+        setTaskName(task.task_name);
+        setDescription(task.description);
+        setStatus(task.status);
+        setAssignedTo(task.assigned_to || '');  // Set the assigned user if available
+        setEditingTask(task);
+        setIsFormVisible(true);
+    };
+
+    // Handle creating a new task
+    const handleCreateNewTask = () => {
+        setTaskName('');
+        setDescription('');
+        setStatus('pending');
+        setAssignedTo('');
+        setEditingTask(null);
+        setIsFormVisible(true);
+    };
+
     return (
         <div style={{
             margin: '20px auto',
@@ -144,15 +157,14 @@ const TaskComponent = () => {
                 marginBottom: '15px',
                 fontSize: '1.5rem',
             }}>Your Tasks</h1>
-        
+
             {error && <div style={{
                 color: 'red',
                 fontWeight: 'bold',
                 textAlign: 'center',
                 marginBottom: '10px'
             }}>{error}</div>}
-        
-         
+
             <button
                 onClick={handleCreateNewTask}
                 style={{
@@ -175,8 +187,7 @@ const TaskComponent = () => {
             >
                 Create New Task
             </button>
-        
-           
+
             {isFormVisible && (
                 <form onSubmit={editingTask ? handleUpdateTask : handleCreateTask} style={{
                     display: 'flex',
@@ -216,7 +227,7 @@ const TaskComponent = () => {
                             onBlur={(e) => e.target.style.borderColor = '#ddd'}
                         />
                     </div>
-        
+
                     <div>
                         <label htmlFor="description" style={{
                             fontWeight: 'bold',
@@ -244,7 +255,7 @@ const TaskComponent = () => {
                             onBlur={(e) => e.target.style.borderColor = '#ddd'}
                         />
                     </div>
-        
+
                     <div>
                         <label htmlFor="status" style={{
                             fontWeight: 'bold',
@@ -275,7 +286,41 @@ const TaskComponent = () => {
                             <option value="completed">Completed</option>
                         </select>
                     </div>
-        
+
+                    <div>
+                        <label htmlFor="assignedTo" style={{
+                            fontWeight: 'bold',
+                            fontSize: '1rem',
+                            color: '#555',
+                            display: 'block',
+                            marginBottom: '6px'
+                        }}>Assign To</label>
+                        <select
+                            id="assignedTo"
+                            value={assignedTo}
+                            onChange={(e) => setAssignedTo(e.target.value)}
+                            required
+                            style={{
+                                width: '100%',
+                                padding: '8px',
+                                fontSize: '0.9rem',
+                                border: '1px solid #ddd',
+                                borderRadius: '4px',
+                                outline: 'none',
+                                transition: 'border-color 0.3s ease'
+                            }}
+                            onFocus={(e) => e.target.style.borderColor = '#007BFF'}
+                            onBlur={(e) => e.target.style.borderColor = '#ddd'}
+                        >
+                            <option value="">Select User</option>
+                            {users.map(user => (
+                                <option key={user.id} value={user.id}>
+                                    {user.name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+
                     <button type="submit" style={{
                         padding: '8px 16px',
                         fontSize: '1rem',
@@ -288,12 +333,12 @@ const TaskComponent = () => {
                         fontWeight: 'bold',
                         marginTop: '10px',
                     }} onMouseEnter={(e) => e.target.style.backgroundColor = '#0056b3'}
-                    onMouseLeave={(e) => e.target.style.backgroundColor = '#007BFF'}>
+                        onMouseLeave={(e) => e.target.style.backgroundColor = '#007BFF'}>
                         {editingTask ? 'Update Task' : 'Create Task'}
                     </button>
                 </form>
             )}
-        
+
             {tasks.length > 0 ? (
                 <ul style={{
                     marginTop: '30px',
@@ -326,6 +371,13 @@ const TaskComponent = () => {
                                 fontWeight: 'bold'
                             }}>
                                 Status: {task.status}
+                            </p>
+                            <p style={{
+                                marginBottom: '8px',
+                                fontSize: '0.95rem',
+                                fontWeight: 'bold'
+                            }}>
+                                Assigned To: {task.assigned_to ? task.assigned_to.name : 'Not assigned'}
                             </p>
                             <div style={{
                                 display: 'flex',

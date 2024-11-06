@@ -22,16 +22,17 @@ class TaskController extends Controller
             'task_name' => 'required|string|max:255',
             'description' => 'required|string',
             'status' => 'required|string|in:pending,completed,started',
+            'assigned_to' => 'required|exists:users,id',  
         ]);
-
+    
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
         }
-
+    
         $task = $this->taskService->createTask($request->all());
         return response()->json(['task' => $task], 201);
     }
-
+    
     public function update($id, Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -69,4 +70,13 @@ class TaskController extends Controller
         $tasks = $this->taskService->getUserTasks();
         return response()->json(['tasks' => $tasks], 200);
     }
+
+    public function getAssignedTasks()
+{
+    // Get all tasks assigned to the authenticated user
+    $tasks = $this->taskService->getAssignedTasks();
+
+    return response()->json(['tasks' => $tasks], 200);
+}
+
 }

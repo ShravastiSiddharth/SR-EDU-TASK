@@ -17,4 +17,11 @@ class UserRepository implements UserRepositoryInterface
     {
         return User::where('email', $email)->first();
     }
+
+    public function getUsersCreatedBy(int $createdById)
+    {
+        // Fetch all users where created_by matches the authenticated user's ID
+        return User::where('created_by', $createdById)
+                   ->get(['id', 'name', 'email', 'created_by']);
+    }
 }

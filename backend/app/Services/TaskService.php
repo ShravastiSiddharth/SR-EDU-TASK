@@ -16,10 +16,13 @@ class TaskService
     }
 
     public function createTask(array $data)
-    { 
+    {
+        // Ensure the 'assigned_to' field is handled if it's provided
         $data['user_id'] = Auth::id();
+        $data['created_by'] = Auth::id();   // Ensure the task is assigned to the current authenticated user
         return $this->taskRepository->create($data);
     }
+    
 
     public function updateTask(int $id, array $data)
     {
@@ -49,4 +52,11 @@ class TaskService
     {
         return $this->taskRepository->findAllByUser(Auth::id());
     }
+
+    public function getAssignedTasks()
+{
+    // Fetch tasks where the assigned_to field matches the authenticated user
+    return $this->taskRepository->findAllAssignedToUser(Auth::id());
+}
+
 }

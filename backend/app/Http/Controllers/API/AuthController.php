@@ -48,4 +48,33 @@ class AuthController extends Controller
 
         return response()->json(['token' => $token], 200);
     }
+
+
+    public function createUser(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:8',
+            'role' => 'required|in:0,1', 
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        
+        $user = $this->authService->createUser($request->all());
+
+        return response()->json(['message' => 'User created successfully', 'user' => $user], 201);
+    }
+
+    public function getUsersCreatedByLoggedInUser()
+    {
+        $users = $this->authService->getUsersCreatedByAuthenticatedUser();
+
+        return response()->json([
+            'users' => $users
+        ], 200);
+    }
 }
